@@ -1,5 +1,5 @@
 
-import { RouteData } from '@/components/RouteInfo';
+import { RouteData, Location } from '@/types/route';
 
 // Sample route data for University of Ghana
 export const campusRoutes: RouteData[] = [
@@ -93,7 +93,7 @@ export const campusRoutes: RouteData[] = [
   },
 ];
 
-export const campusLocations = [
+export const campusLocations: Location[] = [
   { id: 'loc-1', name: 'Great Hall', category: 'landmark' },
   { id: 'loc-2', name: 'Balme Library', category: 'academic' },
   { id: 'loc-3', name: 'Science Block', category: 'academic' },

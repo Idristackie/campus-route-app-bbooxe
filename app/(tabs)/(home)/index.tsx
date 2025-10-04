@@ -15,8 +15,9 @@ import { useTheme } from '@react-navigation/native';
 import { IconSymbol } from '@/components/IconSymbol';
 import { colors, commonStyles } from '@/styles/commonStyles';
 import MapPlaceholder from '@/components/MapPlaceholder';
-import RouteInfo, { RouteData } from '@/components/RouteInfo';
+import RouteInfo from '@/components/RouteInfo';
 import { campusRoutes, campusLocations } from '@/data/routeData';
+import { RouteData, Location } from '@/types/route';
 
 export default function HomeScreen() {
   const theme = useTheme();

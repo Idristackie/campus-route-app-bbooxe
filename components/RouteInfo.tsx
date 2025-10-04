@@ -3,24 +3,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { IconSymbol } from './IconSymbol';
 import { colors, commonStyles } from '@/styles/commonStyles';
-
-export interface RouteStop {
-  id: string;
-  name: string;
-  estimatedTime: number; // in minutes from start
-}
-
-export interface RouteData {
-  id: string;
-  name: string;
-  type: 'shuttle' | 'trotro';
-  fare: number;
-  estimatedDuration: number; // total duration in minutes
-  stops: RouteStop[];
-  operatingHours: string;
-  frequency: string; // e.g., "Every 15 minutes"
-  color: string;
-}
+import { RouteData } from '@/types/route';
 
 interface RouteInfoProps {
   route: RouteData | null;

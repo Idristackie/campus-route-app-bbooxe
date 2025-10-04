@@ -2,21 +2,23 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Stack, router } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconSymbol } from '@/components/IconSymbol';
 import { colors, commonStyles } from '@/styles/commonStyles';
 import { campusRoutes } from '@/data/routeData';
+import { RouteData } from '@/types/route';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function FavoritesScreen() {
-  const [favoriteRoutes, setFavoriteRoutes] = useState([
-    campusRoutes[0], // Legon to Madina
-    campusRoutes[2], // Campus Shuttle A
+  // Mock favorite routes - in a real app, this would come from storage/state management
+  const [favoriteRoutes, setFavoriteRoutes] = useState<RouteData[]>([
+    campusRoutes[0], // Main Campus Loop
+    campusRoutes[2], // Legon - Accra Central
   ]);
 
   const handleRemoveFavorite = (routeId: string) => {
     Alert.alert(
       'Remove Favorite',
-      'Are you sure you want to remove this route from favorites?',
+      'Are you sure you want to remove this route from your favorites?',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -24,108 +26,141 @@ export default function FavoritesScreen() {
           style: 'destructive',
           onPress: () => {
             setFavoriteRoutes(prev => prev.filter(route => route.id !== routeId));
-            console.log('Removed favorite route:', routeId);
-          }
-        }
+          },
+        },
       ]
     );
   };
 
-  const handleRoutePress = (route: any) => {
-    console.log('Selected favorite route:', route.name);
-    router.back();
+  const handleRoutePress = (route: RouteData) => {
+    console.log('Favorite route pressed:', route.name);
+    // Navigate back to home with this route selected
+    router.push('/(tabs)/(home)/');
   };
 
   return (
-    <>
+    <SafeAreaView style={commonStyles.container}>
       <Stack.Screen
         options={{
-          title: "Favorite Routes",
-          headerBackTitle: "Profile",
+          title: 'Favorite Routes',
+          headerStyle: { backgroundColor: colors.card },
+          headerTintColor: colors.text,
         }}
       />
       
-      <SafeAreaView style={[commonStyles.container, { backgroundColor: colors.background }]}>
-        <ScrollView 
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {favoriteRoutes.length === 0 ? (
-            <View style={styles.emptyState}>
-              <IconSymbol name="heart" color={colors.textSecondary} size={48} />
-              <Text style={styles.emptyTitle}>No Favorite Routes</Text>
-              <Text style={styles.emptyDescription}>
-                Add routes to your favorites for quick access
-              </Text>
-            </View>
-          ) : (
-            <>
-              <Text style={styles.sectionTitle}>Your Favorite Routes</Text>
-              {favoriteRoutes.map((route) => (
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {favoriteRoutes.length > 0 ? (
+          <>
+            <Text style={styles.description}>
+              Your saved routes for quick access
+            </Text>
+            
+            {favoriteRoutes.map(route => (
+              <TouchableOpacity
+                key={route.id}
+                style={styles.routeCard}
+                onPress={() => handleRoutePress(route)}
+              >
+                <View style={[styles.routeIndicator, { backgroundColor: route.color }]}>
+                  <IconSymbol 
+                    name={route.type === 'shuttle' ? 'bus.fill' : 'car.fill'} 
+                    color={colors.card} 
+                    size={20} 
+                  />
+                </View>
+                
+                <View style={styles.routeContent}>
+                  <Text style={styles.routeName}>{route.name}</Text>
+                  <Text style={styles.routeDetails}>
+                    {route.type === 'shuttle' ? 'Campus Shuttle' : 'Trotro Route'} • ₵{route.fare.toFixed(2)}
+                  </Text>
+                  <Text style={styles.routeFrequency}>{route.frequency}</Text>
+                </View>
+                
                 <TouchableOpacity
-                  key={route.id}
-                  style={styles.routeCard}
-                  onPress={() => handleRoutePress(route)}
+                  style={styles.removeButton}
+                  onPress={() => handleRemoveFavorite(route.id)}
                 >
-                  <View style={styles.routeHeader}>
-                    <View style={[styles.routeIcon, { backgroundColor: route.color }]}>
-                      <IconSymbol name="bus.fill" color={colors.card} size={20} />
-                    </View>
-                    <View style={styles.routeInfo}>
-                      <Text style={styles.routeName}>{route.name}</Text>
-                      <Text style={styles.routeDescription}>{route.description}</Text>
-                    </View>
-                    <TouchableOpacity
-                      style={styles.favoriteButton}
-                      onPress={() => handleRemoveFavorite(route.id)}
-                    >
-                      <IconSymbol name="heart.fill" color={colors.accent} size={20} />
-                    </TouchableOpacity>
-                  </View>
-                  
-                  <View style={styles.routeDetails}>
-                    <View style={styles.detailItem}>
-                      <IconSymbol name="clock" color={colors.textSecondary} size={14} />
-                      <Text style={styles.detailText}>{route.duration}</Text>
-                    </View>
-                    <View style={styles.detailItem}>
-                      <IconSymbol name="creditcard" color={colors.textSecondary} size={14} />
-                      <Text style={styles.detailText}>₵{route.fare}</Text>
-                    </View>
-                    <View style={styles.detailItem}>
-                      <IconSymbol name="location" color={colors.textSecondary} size={14} />
-                      <Text style={styles.detailText}>{route.stops?.length || 0} stops</Text>
-                    </View>
-                  </View>
+                  <IconSymbol name="heart.fill" color={colors.secondary} size={20} />
                 </TouchableOpacity>
-              ))}
-            </>
-          )}
-        </ScrollView>
-      </SafeAreaView>
-    </>
+              </TouchableOpacity>
+            ))}
+          </>
+        ) : (
+          <View style={styles.emptyState}>
+            <IconSymbol name="heart" color={colors.textSecondary} size={64} />
+            <Text style={styles.emptyTitle}>No Favorite Routes</Text>
+            <Text style={styles.emptyDescription}>
+              Routes you mark as favorites will appear here for quick access.
+            </Text>
+            <TouchableOpacity
+              style={styles.exploreButton}
+              onPress={() => router.push('/(tabs)/(home)/')}
+            >
+              <Text style={styles.exploreButtonText}>Explore Routes</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
+  content: {
     flex: 1,
-  },
-  scrollContent: {
     padding: 16,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 16,
+  description: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginBottom: 20,
+    lineHeight: 20,
   },
-  emptyState: {
-    flex: 1,
+  routeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.card,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)',
+    elevation: 3,
+  },
+  routeIndicator: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 12,
+  },
+  routeContent: {
+    flex: 1,
+  },
+  routeName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 2,
+  },
+  routeDetails: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginBottom: 2,
+  },
+  routeFrequency: {
+    fontSize: 12,
+    color: colors.textSecondary,
+  },
+  removeButton: {
+    padding: 8,
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: 60,
+    paddingHorizontal: 20,
   },
   emptyTitle: {
     fontSize: 20,
@@ -135,60 +170,21 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   emptyDescription: {
-    fontSize: 16,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  routeCard: {
-    backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)',
-    elevation: 3,
-  },
-  routeHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  routeIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  routeInfo: {
-    flex: 1,
-  },
-  routeName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 2,
-  },
-  routeDescription: {
     fontSize: 14,
     color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 24,
   },
-  favoriteButton: {
-    padding: 8,
+  exploreButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
   },
-  routeDetails: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  detailItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  detailText: {
-    fontSize: 12,
-    color: colors.textSecondary,
-    marginLeft: 4,
+  exploreButtonText: {
+    color: colors.card,
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
