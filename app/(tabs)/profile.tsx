@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconSymbol } from '@/components/IconSymbol';
 import { colors, commonStyles } from '@/styles/commonStyles';
@@ -14,6 +14,7 @@ export default function ProfileScreen() {
       description: 'Your saved routes and locations',
       icon: 'heart.fill',
       color: colors.accent,
+      route: '/(tabs)/profile/favorites',
     },
     {
       id: 'history',
@@ -21,6 +22,7 @@ export default function ProfileScreen() {
       description: 'Recent routes and trips',
       icon: 'clock.fill',
       color: colors.primary,
+      route: '/(tabs)/profile/history',
     },
     {
       id: 'notifications',
@@ -28,6 +30,7 @@ export default function ProfileScreen() {
       description: 'Route updates and alerts',
       icon: 'bell.fill',
       color: colors.secondary,
+      route: '/(tabs)/profile/notifications',
     },
     {
       id: 'settings',
@@ -35,6 +38,7 @@ export default function ProfileScreen() {
       description: 'App preferences and account',
       icon: 'gear',
       color: colors.textSecondary,
+      route: '/(tabs)/profile/settings',
     },
     {
       id: 'help',
@@ -42,6 +46,7 @@ export default function ProfileScreen() {
       description: 'FAQs and contact information',
       icon: 'questionmark.circle.fill',
       color: colors.primary,
+      route: '/(tabs)/profile/help',
     },
     {
       id: 'about',
@@ -49,16 +54,29 @@ export default function ProfileScreen() {
       description: 'App version and information',
       icon: 'info.circle.fill',
       color: colors.textSecondary,
+      route: '/(tabs)/profile/about',
     },
   ];
 
-  const handleOptionPress = (optionId: string) => {
-    console.log('Profile option pressed:', optionId);
-    // Here you would navigate to the specific screen or show a modal
+  const handleOptionPress = (option: any) => {
+    console.log('Profile option pressed:', option.id);
+    if (option.route) {
+      router.push(option.route);
+    }
+  };
+
+  const handleHeaderSettingsPress = () => {
+    console.log('Header settings pressed');
+    router.push('/(tabs)/profile/settings');
+  };
+
+  const handleEditProfile = () => {
+    console.log('Edit profile pressed');
+    // This could navigate to an edit profile screen in the future
   };
 
   const renderHeaderRight = () => (
-    <TouchableOpacity style={styles.headerButton}>
+    <TouchableOpacity style={styles.headerButton} onPress={handleHeaderSettingsPress}>
       <IconSymbol name="gear" color={colors.primary} size={20} />
     </TouchableOpacity>
   );
@@ -84,30 +102,34 @@ export default function ProfileScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* Profile Header */}
-          <View style={styles.profileHeader}>
+          <TouchableOpacity style={styles.profileHeader} onPress={handleEditProfile}>
             <View style={styles.avatarContainer}>
               <IconSymbol name="person.fill" color={colors.card} size={40} />
             </View>
             <Text style={styles.userName}>UG Student</Text>
             <Text style={styles.userEmail}>student@ug.edu.gh</Text>
-          </View>
+            <View style={styles.editIndicator}>
+              <IconSymbol name="pencil" color={colors.textSecondary} size={14} />
+              <Text style={styles.editText}>Tap to edit</Text>
+            </View>
+          </TouchableOpacity>
 
           {/* Quick Stats */}
           <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
+            <TouchableOpacity style={styles.statItem} onPress={() => router.push('/(tabs)/profile/history')}>
               <Text style={styles.statNumber}>12</Text>
               <Text style={styles.statLabel}>Routes Used</Text>
-            </View>
+            </TouchableOpacity>
             <View style={styles.statDivider} />
-            <View style={styles.statItem}>
+            <TouchableOpacity style={styles.statItem} onPress={() => router.push('/(tabs)/profile/history')}>
               <Text style={styles.statNumber}>₵45.50</Text>
               <Text style={styles.statLabel}>Total Saved</Text>
-            </View>
+            </TouchableOpacity>
             <View style={styles.statDivider} />
-            <View style={styles.statItem}>
+            <TouchableOpacity style={styles.statItem} onPress={() => router.push('/(tabs)/profile/history')}>
               <Text style={styles.statNumber}>28</Text>
               <Text style={styles.statLabel}>Trips This Month</Text>
-            </View>
+            </TouchableOpacity>
           </View>
 
           {/* Profile Options */}
@@ -116,7 +138,8 @@ export default function ProfileScreen() {
               <TouchableOpacity
                 key={option.id}
                 style={styles.optionItem}
-                onPress={() => handleOptionPress(option.id)}
+                onPress={() => handleOptionPress(option)}
+                activeOpacity={0.7}
               >
                 <View style={[styles.optionIcon, { backgroundColor: option.color }]}>
                   <IconSymbol name={option.icon as any} color={colors.card} size={20} />
@@ -131,12 +154,16 @@ export default function ProfileScreen() {
           </View>
 
           {/* App Info */}
-          <View style={styles.appInfo}>
+          <TouchableOpacity 
+            style={styles.appInfo}
+            onPress={() => router.push('/(tabs)/profile/about')}
+          >
             <Text style={styles.appInfoText}>UG Campus Navigator v1.0.0</Text>
             <Text style={styles.appInfoSubtext}>
               Making campus navigation faster, cheaper, and stress-free
             </Text>
-          </View>
+            <Text style={styles.tapForMore}>Tap for more info</Text>
+          </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
     </>
@@ -180,6 +207,17 @@ const styles = StyleSheet.create({
   userEmail: {
     fontSize: 14,
     color: colors.textSecondary,
+    marginBottom: 8,
+  },
+  editIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  editText: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginLeft: 4,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -248,6 +286,10 @@ const styles = StyleSheet.create({
   appInfo: {
     alignItems: 'center',
     padding: 16,
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)',
+    elevation: 3,
   },
   appInfoText: {
     fontSize: 14,
@@ -260,6 +302,12 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 16,
+    marginBottom: 4,
+  },
+  tapForMore: {
+    fontSize: 10,
+    color: colors.primary,
+    fontWeight: '500',
   },
   headerButton: {
     padding: 8,
